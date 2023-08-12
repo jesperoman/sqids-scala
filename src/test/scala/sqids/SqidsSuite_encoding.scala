@@ -115,23 +115,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
   }
   property("arbitrary number lists") {
     forAll(Gen.listOf(Gen.choose(0, Int.MaxValue))) { (n: List[Int]) =>
-      println(n.length)
-      println(sqids.encode(n))
       assertEquals(sqids.decode(sqids.encode(n)), n)
-    }
-  }
-
-  property("arbitrary strings".ignore) {
-    forAll(
-      Gen
-        .listOfN(5, Gen.oneOf(sqids.alphabet.value.toList))
-        .map(_.mkString.replaceAll("\u0000", ""))
-    ) { (s: String) =>
-      assertEquals(
-        sqids.encode(sqids.decode(s)),
-        s,
-        s"--------------------- String to try with: $s"
-      )
     }
   }
 }

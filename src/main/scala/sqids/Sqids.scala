@@ -6,16 +6,6 @@ import scala.util.control.NoStackTrace
 import scala.annotation.tailrec
 import java.util.StringTokenizer
 
-sealed trait SqidsError extends RuntimeException with NoStackTrace
-
-object SqidsError {
-  final case class OutOfRange(override val getMessage: String) extends SqidsError
-
-  final case class AlphabetTooSmall(override val getMessage: String) extends SqidsError
-
-  final case class AlphabetNotUnique(override val getMessage: String) extends SqidsError
-}
-
 trait Sqids {
   def encode(numbers: List[Int]): String
   def decode(id: String): List[Int]
@@ -25,12 +15,17 @@ trait Sqids {
 }
 
 object Sqids {
-  def forAlphabet(a: Alphabet): Sqids = apply(SqidsOptions.default.copy(alphabet = a))
-  def withBlocklist(blocklist: Blocklist): Sqids = apply(
-    SqidsOptions.default.copy(blocklist = blocklist)
-  )
+  def forAlphabet(a: Alphabet): Sqids =
+    apply(SqidsOptions.default.copy(alphabet = a))
 
-  def default: Sqids = apply(SqidsOptions.default)
+  def withBlocklist(blocklist: Blocklist): Sqids =
+    apply(
+      SqidsOptions.default.copy(blocklist = blocklist)
+    )
+
+  def default: Sqids =
+    apply(SqidsOptions.default)
+
   def apply(options: SqidsOptions): Sqids = {
     val _alphabet = options.alphabet.shuffle
     if (options.minLength < 0)
