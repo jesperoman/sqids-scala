@@ -3,16 +3,14 @@ package sqids
 sealed abstract case class Blocklist(value: Set[String]) {
   def isBlocked(id: String): Boolean = {
     val lowerId = id.toLowerCase()
-    println(s"checking $lowerId against ${value.size} blocked words")
     value
-      .filterNot(_.length < lowerId.length)
+      .filter(_.length() <= id.length())
       .map(_.toLowerCase())
-      .exists(blockWord =>
-        lowerId == blockWord ||
-          (blockWord.matches("""\d""") && (lowerId
-            .startsWith(blockWord) || lowerId.endsWith(blockWord))) ||
-          lowerId.contains(blockWord)
-      )
+      .exists { blockWord =>
+        lowerId.contains(blockWord) ||
+        (blockWord.matches("""\d""") && (lowerId
+          .startsWith(blockWord) || lowerId.endsWith(blockWord)))
+      }
   }
 
 }
