@@ -25,6 +25,7 @@ trait Sqids {
 }
 
 object Sqids {
+  def forAlphabet(a: Alphabet): Sqids = apply(SqidsOptions.default.copy(alphabet = a))
   def withBlocklist(blocklist: Blocklist): Sqids = apply(
     SqidsOptions.default.copy(blocklist = blocklist)
   )
