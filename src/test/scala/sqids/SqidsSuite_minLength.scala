@@ -1,20 +1,13 @@
 package sqids
 
-import munit.Suite
 import munit.ScalaCheckSuite
-import org.scalacheck.Prop._
-import org.scalacheck.Gen
 
 final class SqidsSuite_minLength extends ScalaCheckSuite {
-
   val sqids = Sqids(
-    SqidsOptions.default.copy(minLength =
-      SqidsOptions.default.alphabet.value.length
-    )
+    SqidsOptions.default.copy(minLength = SqidsOptions.default.alphabet.value.length)
   )
 
   test("simple") {
-
     val numbers = List(1, 2, 3);
     val id = "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtnRpgizhjU42qT1cd0dL"
 
@@ -23,7 +16,6 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
   }
 
   test("incremental numbers") {
-
     val ids = Map(
       "jf26PLNeO5WbJDUV7FmMtlGXps3CoqkHnZ8cYd19yIiTAQuvKSExzhrRghBlwf" -> List(
         0,
@@ -75,22 +67,21 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
   }
 
   test("min lengths") {
-    List(0, 1, 5, 10, SqidsOptions.default.alphabet.value.length).foreach(
-      minLength =>
-        List(
-          List(sqids.minValue),
-          List(0, 0, 0, 0, 0),
-          List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
-          List(100, 200, 300),
-          List(1000, 2000, 3000),
-          List(1000000),
-          List(sqids.maxValue)
-        ).foreach { numbers =>
-          val sqids = Sqids(SqidsOptions.default.copy(minLength = minLength))
-          val id = sqids.encode(numbers)
-          assert(id.length >= minLength)
-          assertEquals(sqids.decode(id), numbers)
-        }
+    List(0, 1, 5, 10, SqidsOptions.default.alphabet.value.length).foreach(minLength =>
+      List(
+        List(sqids.minValue),
+        List(0, 0, 0, 0, 0),
+        List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+        List(100, 200, 300),
+        List(1000, 2000, 3000),
+        List(1000000),
+        List(sqids.maxValue)
+      ).foreach { numbers =>
+        val sqids = Sqids(SqidsOptions.default.copy(minLength = minLength))
+        val id = sqids.encode(numbers)
+        assert(id.length >= minLength)
+        assertEquals(sqids.decode(id), numbers)
+      }
     )
 
   }
@@ -103,25 +94,8 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
       "minLength cant be > alphabet length"
     ) {
       Sqids(
-        SqidsOptions.default.copy(minLength =
-          SqidsOptions.default.alphabet.value.length + 1
-        )
+        SqidsOptions.default.copy(minLength = SqidsOptions.default.alphabet.value.length + 1)
       )
     }
   }
-
-// test.fails("out-of-range invalid min length"){
-// 	expect(
-// 		new Sqids({
-// 			minLength: -1
-// 		})
-// 	).rejects;
-
-// 	expect(
-// 		new Sqids({
-// 			minLength: defaultOptions.alphabet.length + 1
-// 		})
-// 	).rejects;
-// })
-
 }

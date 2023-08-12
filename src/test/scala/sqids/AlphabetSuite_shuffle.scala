@@ -20,6 +20,8 @@ class AlphabetSuite_shuffle extends ScalaCheckSuite {
 
     val o1 = "ec38UaynYXvoxSK7RV9uZ1D2HEPw6isrdzAmBNGT5OCJLk0jlFbtqWQ4hIpMgf"
     val o2 = "xI3RUayk1MSolQK7e09zYmFpVXPwHiNrdfBJ6ZAT5uCWbntgcDsEqjv4hLG28O"
+    Alphabet(i1).foreach(a => assertEquals(a.shuffle.value, o1))
+    Alphabet(i2).foreach(a => assertEquals(a.shuffle.value, o2))
   }
   test("swapping last 2 characters") {
     val i1 = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

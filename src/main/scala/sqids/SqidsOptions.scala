@@ -1,9 +1,9 @@
 package sqids
 
 final case class SqidsOptions(
-    alphabet: Alphabet,
-    minLength: Int,
-    blocklist: Blocklist
+  alphabet: Alphabet,
+  minLength: Int,
+  blocklist: Blocklist
 )
 
 object SqidsOptions {

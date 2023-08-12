@@ -1,10 +1,6 @@
 package sqids
 
-import scala.collection.mutable.ArraySeq
 import scala.collection.mutable.ArrayBuffer
-import scala.util.control.NoStackTrace
-import scala.annotation.tailrec
-import java.util.StringTokenizer
 
 trait Sqids {
   def encode(numbers: List[Int]): String
@@ -47,8 +43,7 @@ object Sqids {
         val ret = ArrayBuffer[Int]()
 
         if (id == "") ret
-        else if (id.exists(c => !_alphabet.value.contains(c)))
-          ret
+        else if (id.exists(c => !_alphabet.value.contains(c))) ret
         else {
           val prefix = id(0)
           val offset = _alphabet.value.indexOf(prefix)
@@ -87,6 +82,7 @@ object Sqids {
           throw SqidsError.OutOfRange(
             s"some nr is out of range: $numbers, max: $maxValue min: $minValue"
           )
+
         if (numbers.isEmpty) ""
         else {
           var alphabet = _alphabet.rearrange(numbers)
@@ -125,7 +121,7 @@ object Sqids {
           }
 
           if (options.blocklist.isBlocked(id)) {
-            var newNumbers = numbers.to[ArrayBuffer]
+            var newNumbers = ArrayBuffer.from(numbers)
             if (partitioned)
               if (newNumbers(0) + 1 > this.maxValue)
                 throw new RuntimeException(
@@ -150,17 +146,8 @@ object Sqids {
       .foldLeft[List[List[Char]]](List(List.empty)) {
         case (acc, c) if c == delimiter => List() :: acc
         case (head :: tail, c) => (c :: head) :: tail
+        case (Nil, c) => throw new RuntimeException(s"This is definitely odd, empty list and char: $c")
       }
       .map(_.reverse.mkString)
       .reverse
-
-  // private def toId(num: Int, alphabet: String): String = {
-  //   @tailrec
-  //   def go(num: Int, acc: List[Char]): String =
-  //     if (num <= 0) acc.mkString
-  //     else
-  //       go(num / alphabet.length, alphabet(num % alphabet.length) :: acc)
-
-  //   go(num / alphabet.length, List(alphabet(num % alphabet.length)))
-  // }
 }

@@ -1,8 +1,8 @@
 package sqids
 
 import scala.util.control.NoStackTrace
-import scala.collection.mutable.ArraySeq
 import scala.annotation.tailrec
+import scala.collection.mutable.ArrayBuffer
 
 final case class InvalidAlphabet(override val getMessage: String) extends RuntimeException with NoStackTrace
 
@@ -34,7 +34,7 @@ sealed abstract case class Alphabet(value: String) {
     val iRange = 0 to value.length - 2
     val jRange = (1 to value.length - 1).reverse
 
-    val result: ArraySeq[String] = value.split("").to[ArraySeq]
+    val result: ArrayBuffer[String] = ArrayBuffer.from(value.split(""))
     iRange.zip(jRange).map { case (i, j) =>
       val r = (i * j + result(i).codePointAt(0) + result(
         j
