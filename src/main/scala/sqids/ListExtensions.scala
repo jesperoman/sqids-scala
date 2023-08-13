@@ -23,7 +23,8 @@ object ListExtensions {
     def includes(l: Iterable[A]): Boolean =
       list.sliding(l.size).exists(_ == l)
 
-    def join(d: A): List[A] = ???
+    def join(d: A): List[A] =
+      list.tail.foldLeft(List(list.head))((acc, a) => acc ++ List(d, a))
 
   extension (s: String)
     def split(delimiter: Char): List[String] =

@@ -28,7 +28,8 @@ object Sqids {
     )
 
   def default: Sqids =
-    apply(SqidsOptions.default)
+    StringSqids.default
+      // apply(SqidsOptions.default)
 
   def apply(options: SqidsOptions): Sqids = {
     val _alphabet = options.alphabet.shuffle
