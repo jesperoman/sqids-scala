@@ -1,82 +1,84 @@
-package sqids
+package sqids.general
 
 import sqids.ListExtensions._
 
 import scala.annotation.tailrec
-import sqids.options.Alphabet
-import sqids.options.Blocklist
-import sqids.options.InvalidSqidsOptions
-import sqids.options.SqidsOptions
-trait Sqids {
-  def encodeUnsafeString(numbers: Int*): String
-  def encodeUnsafe(numbers: Int*): Sqid
-  def encode(numbers: Int*): Either[SqidsError, Sqid]
-  def encode(numbers: List[Int]): Either[SqidsError, Sqid]
-  def decode(id: String): List[Int]
+import sqids.general.options.Alphabet
+import sqids.SqidsError
+import sqids.general.options.InvalidSqidsOptions
+import sqids.general.options.SqidsOptions
+import sqids.general.options.Blocklist
+
+trait Sqids[A] {
+  def encodeUnsafeValue(numbers: Int*): List[A]
+  def encodeUnsafe(numbers: Int*): Sqid[A]
+  def encode(numbers: Int*): Either[SqidsError, Sqid[A]]
+  def encode(numbers: List[Int]): Either[SqidsError, Sqid[A]]
+  def decode(id: List[A]): List[Int]
   def minValue: Int
   def maxValue: Int
-  def alphabet: Alphabet
+  def alphabet: Alphabet[A]
 }
 
 object Sqids {
-  def forAlphabet(a: Alphabet): Either[InvalidSqidsOptions, Sqids] =
+  def forAlphabet(a: Alphabet[Char]): Either[InvalidSqidsOptions, Sqids[Char]] =
     SqidsOptions.default.withAlphabet(a).map(Sqids.apply)
 
-  def withBlocklist(blocklist: Blocklist): Sqids =
+  def withBlocklist(blocklist: Blocklist[Char]): Sqids[Char] =
     apply(
       SqidsOptions.default.withBlocklist(blocklist = blocklist)
     )
 
-  def default: Sqids =
+  def default: Sqids[Char] =
     apply(SqidsOptions.default)
 
-  def apply(options: SqidsOptions): Sqids = {
+  def apply[A](options: SqidsOptions[A]): Sqids[A] = {
     val _alphabet = options.alphabet.shuffle
     new Sqids {
 
-      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers*) match {
+      override def encodeUnsafe(numbers: Int*): Sqid[A] = encode(numbers*) match {
         case Left(value) => throw value
         case Right(value) => value
       }
 
-      override def encodeUnsafeString(numbers: Int*): String = encode(numbers*) match {
+      override def encodeUnsafeValue(numbers: Int*): List[A] = encode(numbers*) match {
         case Left(error) => throw error
         case Right(value) => value.value
       }
 
-      override def encode(numbers: Int*): Either[SqidsError, Sqid] =
+      override def encode(numbers: Int*): Either[SqidsError, Sqid[A]] =
         encode(numbers.toList)
 
-      override def alphabet: Alphabet = options.alphabet
+      override def alphabet: Alphabet[A] = options.alphabet
 
-      override def encode(numbers: List[Int]): Either[SqidsError, Sqid] =
+      override def encode(numbers: List[Int]): Either[SqidsError, Sqid[A]] =
         encode(numbers, false)
 
       override def minValue: Int = 0
 
       override def maxValue: Int = Int.MaxValue
 
-      override def decode(input: String): List[Int] =
-        input.toList match {
+      override def decode(input: List[A]): List[Int] =
+        input match {
           case Nil => List.empty
           case s if s.exists(c => !_alphabet.value.contains(c)) => List.empty
-          case prefix :: id => getNumbers(prefix, id.mkString)
+          case prefix :: id => getNumbers(prefix, id)
         }
 
-      private def getNumbers(prefix: Char, id: String): List[Int] = {
+      private def getNumbers(prefix: A, id: List[A]): List[Int] = {
         @tailrec
         def go(
-          id: String,
-          alphabet: Alphabet,
+          id: List[A],
+          alphabet: Alphabet[A],
           acc: Vector[Int] = Vector.empty
         ): List[Int] =
           if (id.isEmpty) acc.toList
           else {
             val separator = alphabet.separator
-            id.split(separator) match {
+            id.spl(separator) match {
               case List(c) => (acc :+ alphabet.removeSeparator.toNumber(c)).toList
               case c :: next =>
-                val newId = next.mkString(separator.toString)
+                val newId = next.join(List(separator)).flatten
                 go(newId, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(c))
               case Nil => acc.toList
             }
@@ -98,7 +100,7 @@ object Sqids {
       private def encode(
         numbers: List[Int],
         partitioned: Boolean
-      ): Either[SqidsError, Sqid] =
+      ): Either[SqidsError, Sqid[A]] =
         numbers match {
           case numbers if numbers.exists(i => i > maxValue || i < minValue) =>
             Left(

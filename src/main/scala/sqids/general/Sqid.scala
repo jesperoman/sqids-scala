@@ -1,35 +1,35 @@
-package sqids
+package sqids.general
 
 import scala.annotation.tailrec
-import sqids.options.Alphabet
-import sqids.options.Blocklist
+import sqids.general.options.Alphabet
+import sqids.general.options.Blocklist
 
-final case class Sqid(
-  value: String,
-  alphabet: Alphabet,
+final case class Sqid[A](
+  value: List[A],
+  alphabet: Alphabet[A],
   numbers: List[Int],
   partitioned: Boolean,
-  originalAlphabet: Alphabet
+  originalAlphabet: Alphabet[A]
 ) {
-  override def toString = value
+  override def toString = value.mkString("-")
   def withNextnr(nr: Int) = append(alphabet.removeSeparator.toId(nr))
-  def addSeparator = append(alphabet.separator.toString)
-  def addPartitionOrSeparator(partition: String, shouldAddPartition: Boolean) =
-    if (shouldAddPartition) append(partition)
+  def addSeparator = append(List(alphabet.separator))
+  def addPartitionOrSeparator(partition: A, shouldAddPartition: Boolean) =
+    if (shouldAddPartition) append(List(partition))
     else addSeparator
-  def append(s: String) = copy(value = value + s)
+  def append(s: List[A]) = copy(value = value ++ s)
   def length = value.length
-  def fillToMinLength(minLength: Int): Sqid =
+  def fillToMinLength(minLength: Int): Sqid[A] =
     copy(value =
-      value.head.toString +
-        alphabet.value.take(minLength - length) +
+      List(value.head) ++
+        alphabet.value.take(minLength - length) ++
         value.drop(1).take(length)
     )
   def shuffle = copy(alphabet = alphabet.shuffle)
 
-  def blocked(blocklist: Blocklist) = blocklist.isBlocked(value)
+  def blocked(blocklist: Blocklist[A]) = blocklist.isBlocked(value)
 
-  def handleBlocked(blocklist: Blocklist): Sqid =
+  def handleBlocked(blocklist: Blocklist[A]): Sqid[A] =
     if (blocked(blocklist)) {
       val newNumbers =
         if (partitioned)
@@ -41,7 +41,7 @@ final case class Sqid(
         .handleBlocked(blocklist)
     } else this
 
-  def handleMinLength(minLength: Int): Sqid =
+  def handleMinLength(minLength: Int): Sqid[A] =
     if (length < minLength)
       if (!partitioned)
         Sqid
@@ -53,15 +53,15 @@ final case class Sqid(
 }
 
 object Sqid {
-  def fromNumbers(
+  def fromNumbers[A](
     numbers: List[Int],
-    a: Alphabet,
+    a: Alphabet[A],
     partitioned: Boolean
-  ): Sqid = {
+  ): Sqid[A] = {
     val alphabet = a.rearrange(numbers)
 
     val sqid = Sqid(
-      value = alphabet.prefix.toString,
+      value = List(alphabet.prefix),
       alphabet = alphabet.removePrefixAndPartition,
       numbers = numbers,
       partitioned = partitioned,
@@ -71,11 +71,11 @@ object Sqid {
     @tailrec
     def go(
       numbers: List[Int],
-      sqid: Sqid,
+      sqid: Sqid[A],
       first: Boolean = false
-    ): Sqid =
+    ): Sqid[A] =
       numbers match {
-        case Nil => sqid.copy(value = "")
+        case Nil => sqid.copy(value = List.empty)
         case List(nr) => sqid.withNextnr(nr)
         case nr :: next =>
           go(
@@ -83,7 +83,7 @@ object Sqid {
             sqid = sqid
               .withNextnr(nr)
               .addPartitionOrSeparator(
-                alphabet.partition.toString,
+                alphabet.partition,
                 first && partitioned
               )
               .shuffle

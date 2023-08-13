@@ -9,8 +9,6 @@ object ListExtensions {
       case (a, acc) if a == delimiter => List() :: acc
       case (a, acc) => (a :: acc.head) :: acc.tail
     }
-
-  extension [A](list: Iterable[A])
     def split2(l: Iterable[A]): List[List[A]] = {
       @tailrec
       def go(left: List[A], acc: List[List[A]]): List[List[A]] =
@@ -22,6 +20,10 @@ object ListExtensions {
 
       go(list.toList, List(List.empty)).reverse.map(_.reverse)
     }
+    def includes(l: Iterable[A]): Boolean =
+      list.sliding(l.size).exists(_ == l)
+
+    def join(d: A): List[A] = ???
 
   extension (s: String)
     def split(delimiter: Char): List[String] =
