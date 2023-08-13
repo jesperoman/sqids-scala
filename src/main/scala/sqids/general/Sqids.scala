@@ -1,6 +1,6 @@
 package sqids.general
 
-import sqids.ListExtensions._
+import sqids.SplitKit._
 
 import scala.annotation.tailrec
 import sqids.general.options.Alphabet

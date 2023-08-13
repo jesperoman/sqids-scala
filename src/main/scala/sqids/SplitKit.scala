@@ -3,8 +3,8 @@ package sqids
 import scala.annotation.tailrec
 
 // Since default behaviour in splitting strings is different from javascript, this had to be implemented
-object ListExtensions {
-  extension [A](list: Iterable[A])
+object SplitKit {
+  implicit class IterableExtensions[A](list: Iterable[A]) {
     def spl(delimiter: A): List[List[A]] = list.foldRight(List(List.empty[A])) {
       case (a, acc) if a == delimiter => List() :: acc
       case (a, acc) => (a :: acc.head) :: acc.tail
@@ -25,10 +25,13 @@ object ListExtensions {
 
     def join(d: A): List[A] =
       list.tail.foldLeft(List(list.head))((acc, a) => acc ++ List(d, a))
+  }
 
-  extension (s: String)
+  implicit class StringExtensions(s: String) {
     def split(delimiter: Char): List[String] =
-      s.spl(delimiter).map(_.mkString)
+      s.toList.spl(delimiter).map(_.mkString)
+
     def splitJS(delimiter: String): List[String] =
-      s.split2(delimiter).map(_.mkString)
+      s.toList.split2(delimiter).map(_.mkString)
+  }
 }
