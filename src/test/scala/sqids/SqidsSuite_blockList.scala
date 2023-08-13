@@ -7,14 +7,14 @@ final class SqidsSuite_blockList extends ScalaCheckSuite {
 
   test("simple") {
     val numbers = sqids.decode("sexy")
-    val encoded = sqids.encodeUnsafeString(numbers*)
+    val encoded = sqids.encodeUnsafeString(numbers: _*)
     assertEquals(encoded, "d171vI")
   }
 
   test("if an empty blocklist param passed, don't use any blocklist") {
     val sqids = Sqids.withBlocklist(Blocklist.empty)
     val numbers = sqids.decode("sexy")
-    val encoded = sqids.encodeUnsafeString(numbers*)
+    val encoded = sqids.encodeUnsafeString(numbers: _*)
     assertEquals(encoded, "sexy")
   }
   test("if a non-empty blocklist param passed, use only that") {

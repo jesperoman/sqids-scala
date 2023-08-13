@@ -28,7 +28,7 @@ object SplitKit {
   }
 
   implicit class StringExtensions(s: String) {
-    def split(delimiter: Char): List[String] =
+    def splitJS(delimiter: Char): List[String] =
       s.toList.spl(delimiter).map(_.mkString)
 
     def splitJS(delimiter: String): List[String] =

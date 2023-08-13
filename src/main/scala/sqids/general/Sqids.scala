@@ -34,14 +34,14 @@ object Sqids {
 
   def apply[A](options: SqidsOptions[A]): Sqids[A] = {
     val _alphabet = options.alphabet.shuffle
-    new Sqids {
+    new Sqids[A] {
 
-      override def encodeUnsafe(numbers: Int*): Sqid[A] = encode(numbers*) match {
+      override def encodeUnsafe(numbers: Int*): Sqid[A] = encode(numbers: _*) match {
         case Left(value) => throw value
         case Right(value) => value
       }
 
-      override def encodeUnsafeValue(numbers: Int*): List[A] = encode(numbers*) match {
+      override def encodeUnsafeValue(numbers: Int*): List[A] = encode(numbers: _*) match {
         case Left(error) => throw error
         case Right(value) => value.value
       }

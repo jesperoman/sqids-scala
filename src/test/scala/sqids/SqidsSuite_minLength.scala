@@ -10,7 +10,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
     test("simple") {
       val numbers = List(1, 2, 3);
       val id = "75JILToVsGerOADWmHlY38xvbaNZKQ9wdFS0B6kcMEtnRpgizhjU42qT1cd0dL"
-      assertEquals(sqids.encodeUnsafeString(numbers*), id)
+      assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
       assertEquals(sqids.decode(id), numbers)
     }
 
@@ -59,7 +59,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
       )
 
       ids.foreach { case (id, numbers) =>
-        assertEquals(sqids.encodeUnsafeString(numbers*), id)
+        assertEquals(sqids.encodeUnsafeString(numbers: _*), id)
         assertEquals(sqids.decode(id), numbers)
       }
 
@@ -77,7 +77,7 @@ final class SqidsSuite_minLength extends ScalaCheckSuite {
           List(sqids.maxValue)
         ).foreach { numbers =>
           SqidsOptions.default.withMinLength(minLength).map(Sqids.apply).foreach { sqids =>
-            val id = sqids.encodeUnsafeString(numbers*)
+            val id = sqids.encodeUnsafeString(numbers: _*)
             assert(id.length >= minLength)
             assertEquals(sqids.decode(id), numbers)
           }

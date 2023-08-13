@@ -2,14 +2,14 @@ package sqids
 
 import sqids.general.{Sqids => GenSqids}
 import sqids.options.Alphabet
-import sqids.Sqids
 
 object StringSqids {
   def default: Sqids = {
     val charsSqids = GenSqids.default
-    val a = Alphabet(charsSqids.alphabet.value.mkString) match
+    val a = Alphabet(charsSqids.alphabet.value.mkString) match {
       case Left(value) => throw value
       case Right(value) => value
+    }
 
     new Sqids {
       override def maxValue: Int = charsSqids.maxValue
@@ -37,7 +37,7 @@ object StringSqids {
 
       override def decode(id: String): List[Int] = charsSqids.decode(id.toList)
 
-      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers*) match {
+      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers: _*) match {
         case Left(error) => throw error
         case Right(value) => value
       }
@@ -46,7 +46,7 @@ object StringSqids {
 
       override def alphabet: Alphabet = a
 
-      override def encodeUnsafeString(numbers: Int*): String = encodeUnsafe(numbers*).value
+      override def encodeUnsafeString(numbers: Int*): String = encodeUnsafe(numbers: _*).value
 
     }
 

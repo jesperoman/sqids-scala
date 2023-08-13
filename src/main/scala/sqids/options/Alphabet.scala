@@ -68,9 +68,9 @@ sealed abstract case class Alphabet(value: String) {
 object Alphabet {
   def apply(value: String): Either[InvalidAlphabet, Alphabet] =
     value match {
-      case v if value.distinct.length != value.length =>
+      case v if v.distinct.length != v.length =>
         Left(InvalidAlphabet("Alphabet must contain unique characters"))
-      case v if value.length < 5 =>
+      case v if v.length < 5 =>
         Left(InvalidAlphabet("Alphabet must contain more than 5 characters"))
       case v =>
         Right(new Alphabet(v) {})

@@ -29,19 +29,18 @@ object Sqids {
     )
 
   def default: Sqids =
-    StringSqids.default
-      // apply(SqidsOptions.default)
+    apply(SqidsOptions.default)
 
   def apply(options: SqidsOptions): Sqids = {
     val _alphabet = options.alphabet.shuffle
     new Sqids {
 
-      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers*) match {
+      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers: _*) match {
         case Left(value) => throw value
         case Right(value) => value
       }
 
-      override def encodeUnsafeString(numbers: Int*): String = encode(numbers*) match {
+      override def encodeUnsafeString(numbers: Int*): String = encode(numbers: _*) match {
         case Left(error) => throw error
         case Right(value) => value.value
       }
@@ -75,7 +74,7 @@ object Sqids {
           if (id.isEmpty) acc.toList
           else {
             val separator = alphabet.separator
-            id.split(separator) match {
+            id.splitJS(separator) match {
               case List(c) => (acc :+ alphabet.removeSeparator.toNumber(c)).toList
               case c :: next =>
                 val newId = next.mkString(separator.toString)
