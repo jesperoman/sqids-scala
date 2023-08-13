@@ -13,7 +13,7 @@ sealed abstract case class SqidsOptions(
   def withBlocklist(blocklist: Blocklist): SqidsOptions = new SqidsOptions(
     alphabet,
     minLength,
-    blocklist
+    blocklist.filter(alphabet)
   ) {}
 
   def withAlphabet(alphabet: Alphabet): Either[InvalidSqidsOptions, SqidsOptions] = SqidsOptions.apply(
