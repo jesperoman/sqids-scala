@@ -3,6 +3,10 @@ package sqids
 import sqids.ListExtensions._
 
 import scala.annotation.tailrec
+import sqids.options.Alphabet
+import sqids.options.Blocklist
+import sqids.options.InvalidSqidsOptions
+import sqids.options.SqidsOptions
 trait Sqids {
   def encodeUnsafeString(numbers: Int*): String
   def encodeUnsafe(numbers: Int*): Sqid

@@ -1,6 +1,7 @@
 package sqids
 
 import munit.ScalaCheckSuite
+import sqids.options.SqidsOptions
 
 final class SqidsSuite_minLength extends ScalaCheckSuite {
 

@@ -1,5 +1,6 @@
 package sqids
 import munit.ScalaCheckSuite
+import sqids.options.Blocklist
 
 final class SqidsSuite_blockList extends ScalaCheckSuite {
   val sqids = Sqids.default

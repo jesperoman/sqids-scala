@@ -1,4 +1,4 @@
-package sqids
+package sqids.options
 
 sealed abstract case class Blocklist(value: Set[String]) {
   def isBlocked(id: String): Boolean = {

@@ -1,4 +1,4 @@
-package sqids
+package sqids.options
 
 import scala.util.control.NoStackTrace
 

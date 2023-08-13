@@ -1,6 +1,7 @@
 package sqids
 
 import munit.ScalaCheckSuite
+import sqids.options.Alphabet
 
 class AlphabetSuite_shuffle extends ScalaCheckSuite {
   test("default shuffle, checking for randomness") {

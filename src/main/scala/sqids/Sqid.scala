@@ -1,6 +1,8 @@
 package sqids
 
 import scala.annotation.tailrec
+import sqids.options.Alphabet
+import sqids.options.Blocklist
 
 final case class Sqid(
   value: String,
