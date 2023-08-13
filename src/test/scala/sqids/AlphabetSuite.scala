@@ -9,7 +9,7 @@ class AlphabetSuite extends ScalaCheckSuite {
     Alphabet("0123456789abcdef")
       .flatMap(Sqids.forAlphabet)
       .foreach { sqids =>
-        assertEquals(sqids.encode(numbers), id)
+        assertEquals(sqids.encode(numbers).map(_.value), Right(id))
         assertEquals(sqids.decode(id), numbers)
       }
   }
@@ -18,7 +18,7 @@ class AlphabetSuite extends ScalaCheckSuite {
     val numbers = List(1, 2, 3)
     Alphabet("abcde")
       .flatMap(Sqids.forAlphabet)
-      .foreach(sqids => assertEquals(sqids.decode(sqids.encode(numbers)), numbers))
+      .foreach(sqids => assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers*)), numbers))
   }
 
   test("long alphabet") {
@@ -27,7 +27,7 @@ class AlphabetSuite extends ScalaCheckSuite {
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~"
     )
       .flatMap(Sqids.forAlphabet)
-      .foreach(sqids => assertEquals(sqids.decode(sqids.encode(numbers)), numbers))
+      .foreach(sqids => assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers*)), numbers))
   }
 
   test("repeating alphabet characters") {

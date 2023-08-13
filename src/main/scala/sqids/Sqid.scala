@@ -9,6 +9,7 @@ final case class Sqid(
   partitioned: Boolean,
   originalAlphabet: Alphabet
 ) {
+  override def toString = value
   def withNextnr(nr: Int) = append(alphabet.removeSeparator.toId(nr))
   def addSeparator = append(alphabet.separator.toString)
   def addPartitionOrSeparator(partition: String, shouldAddPartition: Boolean) =

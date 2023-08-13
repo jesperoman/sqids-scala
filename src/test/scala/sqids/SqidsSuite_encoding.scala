@@ -9,14 +9,14 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
   test("simple") {
     val numbers = List(1, 2, 3);
     val id = "8QRLaD";
-    assertEquals(sqids.encode(numbers), id)
+    assertEquals(sqids.encodeUnsafeString(numbers*), id)
   }
 
   test("different inputs") {
     val numbers =
       List(0, 0, 0, 1, 2, 3, 100, 1000, 100000, 1000000, sqids.maxValue)
 
-    assertEquals(sqids.decode(sqids.encode(numbers)), numbers)
+    assertEquals(sqids.decode(sqids.encodeUnsafeString(numbers*)), numbers)
   }
 
   test("incremental numbers") {
@@ -33,7 +33,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
       "n8" -> List(9)
     )
     ids.foreach { case (id, numbers) =>
-      assertEquals(sqids.encode(numbers), id)
+      assertEquals(sqids.encodeUnsafeString(numbers*), id)
       assertEquals(sqids.decode(id), numbers)
     }
   }
@@ -52,7 +52,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
       "mIxM" -> List(0, 9)
     )
     ids.foreach { case (id, numbers) =>
-      assertEquals(sqids.encode(numbers), id)
+      assertEquals(sqids.encodeUnsafeString(numbers*), id)
       assertEquals(sqids.decode(id), numbers)
     }
   }
@@ -70,7 +70,7 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
       "m4xT" -> List(9, 0)
     )
     ids.foreach { case (id, numbers) =>
-      assertEquals(sqids.encode(numbers), id)
+      assertEquals(sqids.encodeUnsafeString(numbers*), id)
       assertEquals(sqids.decode(id), numbers)
     }
   }
@@ -80,12 +80,12 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
       50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75,
       76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99)
 
-    val output = sqids.decode(sqids.encode(numbers))
+    val output = sqids.decode(sqids.encodeUnsafeString(numbers*))
     assertEquals(output, numbers)
   }
 
   test("encoding no numbers") {
-    assertEquals(sqids.encode(List()), "")
+    assertEquals(sqids.encodeUnsafeString(), "")
   }
   test("decoding empty string") {
     assertEquals(sqids.decode(""), List())
@@ -94,27 +94,25 @@ final class SqidsSuite_encoding extends ScalaCheckSuite {
     assertEquals(sqids.decode("*"), List())
   }
   test("encode out-of-range numbers") {
-    interceptMessage[SqidsError.OutOfRange](
-      "some nr is out of range: List(-1), max: 2147483647 min: 0"
-    ) {
-      sqids.encode(List(sqids.minValue - 1))
-    }
+    assertEquals(
+      sqids.encode(List(sqids.minValue - 1)),
+      Left(SqidsError.OutOfRange("some nr is out of range: List(-1), max: 2147483647 min: 0"))
+    )
 
-    interceptMessage[SqidsError.OutOfRange](
-      "some nr is out of range: List(-2147483648), max: 2147483647 min: 0"
-    ) {
-      sqids.encode(List(sqids.maxValue + 1))
-    }
+    assertEquals(
+      sqids.encode(List(sqids.maxValue + 1)),
+      Left(SqidsError.OutOfRange("some nr is out of range: List(-2147483648), max: 2147483647 min: 0"))
+    )
   }
 
   property("arbitrary numbers") {
     forAll(Gen.choose(0, Int.MaxValue)) { (n: Int) =>
-      assertEquals(sqids.decode(sqids.encode(List(n))), List(n))
+      assertEquals(sqids.decode(sqids.encodeUnsafeString(n)), List(n))
     }
   }
   property("arbitrary number lists") {
     forAll(Gen.listOf(Gen.choose(0, Int.MaxValue))) { (n: List[Int]) =>
-      assertEquals(sqids.decode(sqids.encode(n)), n)
+      assertEquals(sqids.decode(sqids.encodeUnsafeString(n*)), n)
     }
   }
 }

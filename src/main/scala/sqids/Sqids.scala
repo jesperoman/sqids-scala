@@ -4,8 +4,10 @@ import sqids.ListExtensions._
 
 import scala.annotation.tailrec
 trait Sqids {
-  def encode(numbers: List[Int]): String
-  def encode(numbers: Int*): String
+  def encodeUnsafeString(numbers: Int*): String
+  def encodeUnsafe(numbers: Int*): Sqid
+  def encode(numbers: Int*): Either[SqidsError, Sqid]
+  def encode(numbers: List[Int]): Either[SqidsError, Sqid]
   def decode(id: String): List[Int]
   def minValue: Int
   def maxValue: Int
@@ -27,15 +29,22 @@ object Sqids {
   def apply(options: SqidsOptions): Sqids = {
     val _alphabet = options.alphabet.shuffle
     new Sqids {
-      override def encode(numbers: Int*): String =
+
+      override def encodeUnsafe(numbers: Int*): Sqid = encode(numbers*) match
+        case Left(value) => throw value
+        case Right(value) => value
+
+      override def encodeUnsafeString(numbers: Int*): String = encode(numbers*) match
+        case Left(error) => throw error
+        case Right(value) => value.value
+
+      override def encode(numbers: Int*): Either[SqidsError, Sqid] =
         encode(numbers.toList)
 
       override def alphabet: Alphabet = options.alphabet
 
-      override def encode(numbers: List[Int]): String =
-        encode(numbers, false) match
-          case Left(value) => throw value
-          case Right(value) => value.value
+      override def encode(numbers: List[Int]): Either[SqidsError, Sqid] =
+        encode(numbers, false)
 
       override def minValue: Int = 0
 
