@@ -13,12 +13,12 @@ trait Sqids {
 }
 
 object Sqids {
-  def forAlphabet(a: Alphabet): Sqids =
-    apply(SqidsOptions.default.copy(alphabet = a))
+  def forAlphabet(a: Alphabet): Either[InvalidSqidsOptions, Sqids] =
+    SqidsOptions.default.withAlphabet(a).map(Sqids.apply)
 
   def withBlocklist(blocklist: Blocklist): Sqids =
     apply(
-      SqidsOptions.default.copy(blocklist = blocklist)
+      SqidsOptions.default.withBlocklist(blocklist = blocklist)
     )
 
   def default: Sqids =
@@ -26,13 +26,9 @@ object Sqids {
 
   def apply(options: SqidsOptions): Sqids = {
     val _alphabet = options.alphabet.shuffle
-    if (options.minLength < 0)
-      throw SqidsError.OutOfRange("minLength cant be < 0")
-    if (options.minLength > options.alphabet.value.length)
-      throw SqidsError.OutOfRange("minLength cant be > alphabet length")
     new Sqids {
-
-      override def encode(numbers: Int*): String = encode(numbers.toList)
+      override def encode(numbers: Int*): String =
+        encode(numbers.toList)
 
       override def alphabet: Alphabet = options.alphabet
 
@@ -52,7 +48,7 @@ object Sqids {
           case prefix :: id => getNumbers(prefix, id.mkString)
         }
 
-      def getNumbers(prefix: Char, id: String): List[Int] = {
+      private def getNumbers(prefix: Char, id: String): List[Int] = {
         @tailrec
         def go(
           id: String,

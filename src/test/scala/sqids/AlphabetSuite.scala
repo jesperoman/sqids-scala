@@ -7,7 +7,7 @@ class AlphabetSuite extends ScalaCheckSuite {
     val numbers = List(1, 2, 3)
     val id = "4d9fd2"
     Alphabet("0123456789abcdef")
-      .map(Sqids.forAlphabet)
+      .flatMap(Sqids.forAlphabet)
       .foreach { sqids =>
         assertEquals(sqids.encode(numbers), id)
         assertEquals(sqids.decode(id), numbers)
@@ -17,7 +17,7 @@ class AlphabetSuite extends ScalaCheckSuite {
   test("short alphabet") {
     val numbers = List(1, 2, 3)
     Alphabet("abcde")
-      .map(Sqids.forAlphabet)
+      .flatMap(Sqids.forAlphabet)
       .foreach(sqids => assertEquals(sqids.decode(sqids.encode(numbers)), numbers))
   }
 
@@ -26,7 +26,7 @@ class AlphabetSuite extends ScalaCheckSuite {
     Alphabet(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_+|{}[];:'\"/?.>,<`~"
     )
-      .map(Sqids.forAlphabet)
+      .flatMap(Sqids.forAlphabet)
       .foreach(sqids => assertEquals(sqids.decode(sqids.encode(numbers)), numbers))
   }
 

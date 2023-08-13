@@ -12,7 +12,8 @@ sealed abstract case class Blocklist(value: Set[String]) {
           .startsWith(blockWord) || lowerId.endsWith(blockWord)))
       }
   }
-
+  def filter(alphabet: Alphabet): Blocklist =
+    Blocklist.apply(value.filter(_.forall(alphabet.value.contains)))
 }
 
 object Blocklist {

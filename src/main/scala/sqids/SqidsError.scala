@@ -10,4 +10,6 @@ object SqidsError {
   final case class AlphabetTooSmall(override val getMessage: String) extends SqidsError
 
   final case class AlphabetNotUnique(override val getMessage: String) extends SqidsError
+
+  final case class EncodeError(override val getMessage: String) extends SqidsError
 }
