@@ -9,7 +9,7 @@ final case class InvalidAlphabet(override val getMessage: String) extends Runtim
 sealed abstract case class Alphabet(value: String) {
   def length = value.length
   def indexOf(c: Char) = value.indexOf(c)
-  def prefix = value(0)
+  def prefix = value.head
   def partition = value(1)
   def removePrefixAndPartition: Alphabet = new Alphabet(value.drop(2)) {}
   def removeSeparator: Alphabet = new Alphabet(value.take(value.length - 1)) {}
@@ -35,10 +35,14 @@ sealed abstract case class Alphabet(value: String) {
     val jRange = (1 to value.length - 1).reverse
 
     val result: ArrayBuffer[String] = ArrayBuffer.from(value.split(""))
-    iRange.zip(jRange).map { case (i, j) =>
-      val r = (i * j + result(i).codePointAt(0) + result(
-        j
-      ).codePointAt(0)) % value.length
+    iRange.zip(jRange).foreach { case (i, j) =>
+      val r = (i *
+        j +
+        result(i)
+          .codePointAt(0) +
+        result(j)
+          .codePointAt(0)) %
+        value.length
       val rChar = result(r)
       val iChar = result(i)
       result(i) = rChar
@@ -48,16 +52,14 @@ sealed abstract case class Alphabet(value: String) {
   }
 
   def getOffset(numbers: List[Int]): Int =
-    numbers.zipWithIndex.foldLeft(numbers.length) { case (acc, (number, index)) =>
-      value(number % value.length).toString
-        .codePointAt(0) + index + acc
-    } % value.length
+    numbers.zipWithIndex
+      .foldLeft(numbers.length) { case (acc, (number, index)) =>
+        value(number % value.length).toString
+          .codePointAt(0) + index + acc
+      } % value.length
 
   def rearrange(offset: Int): Alphabet =
-    new Alphabet(
-      value.slice(offset, value.length) +
-        value.slice(0, offset)
-    ) {}
+    new Alphabet(value.drop(offset) + value.take(offset)) {}
 
   def rearrange(numbers: List[Int]): Alphabet =
     rearrange(getOffset(numbers))

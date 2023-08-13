@@ -1,9 +1,11 @@
 package sqids
 
-import scala.collection.mutable.ArrayBuffer
+import sqids.ListExtensions._
 
+import scala.annotation.tailrec
 trait Sqids {
   def encode(numbers: List[Int]): String
+  def encode(numbers: Int*): String
   def decode(id: String): List[Int]
   def minValue: Int
   def maxValue: Int
@@ -30,124 +32,78 @@ object Sqids {
       throw SqidsError.OutOfRange("minLength cant be > alphabet length")
     new Sqids {
 
+      override def encode(numbers: Int*): String = encode(numbers.toList)
+
       override def alphabet: Alphabet = options.alphabet
 
-      override def encode(numbers: List[Int]): String = encode(numbers, false)
+      override def encode(numbers: List[Int]): String =
+        encode(numbers, false) match
+          case Left(value) => throw value
+          case Right(value) => value.value
 
       override def minValue: Int = 0
 
       override def maxValue: Int = Int.MaxValue
 
-      override def decode(input: String): List[Int] = {
-        var id = input
-        val ret = ArrayBuffer[Int]()
-
-        if (id == "") ret
-        else if (id.exists(c => !_alphabet.value.contains(c))) ret
-        else {
-          val prefix = id(0)
-          val offset = _alphabet.value.indexOf(prefix)
-          var alphabet = _alphabet.rearrange(offset)
-          val partition = alphabet.partition
-
-          alphabet = alphabet.removePrefixAndPartition
-          id = id.drop(1)
-          val partitionIndex = id.indexOf(partition)
-          if (partitionIndex > 0 && partitionIndex < id.length - 1) {
-            id = id.drop(partitionIndex + 1)
-            alphabet = alphabet.shuffle
-          }
-
-          while (id.length > 0) {
-            val separator = alphabet.separator
-            val chunks = splitString(id, separator)
-            if (chunks.length > 0) {
-              val alphabetWithoutSeparator =
-                alphabet.removeSeparator
-              ret.append(alphabetWithoutSeparator.toNumber(chunks(0)))
-              if (chunks.length > 1)
-                alphabet = alphabet.shuffle
-            }
-            id = chunks.drop(1).mkString(separator.toString)
-          }
+      override def decode(input: String): List[Int] =
+        input.toList match {
+          case Nil => List.empty
+          case s if s.exists(c => !_alphabet.value.contains(c)) => List.empty
+          case prefix :: id => getNumbers(prefix, id.mkString)
         }
-        ret.toList
+
+      def getNumbers(prefix: Char, id: String): List[Int] = {
+        @tailrec
+        def go(
+          id: String,
+          alphabet: Alphabet,
+          acc: Vector[Int] = Vector.empty
+        ): List[Int] =
+          if (id.isEmpty) acc.toList
+          else {
+            val separator = alphabet.separator
+            id.split(separator) match {
+              case List(c) => (acc :+ alphabet.removeSeparator.toNumber(c)).toList
+              case c :: next =>
+                val newId = next.mkString(separator.toString)
+                go(newId, alphabet.shuffle, acc :+ alphabet.removeSeparator.toNumber(c))
+              case Nil => acc.toList
+            }
+          }
+
+        val (alphabet, partitionIndex) = {
+          val offset = _alphabet.value.indexOf(prefix)
+          val rearranged = _alphabet.rearrange(offset)
+          val partition = rearranged.partition
+          (rearranged.removePrefixAndPartition, id.indexOf(partition))
+        }
+
+        if (partitionIndex > 0 && partitionIndex < id.length - 1)
+          go(id.drop(partitionIndex + 1), alphabet.shuffle)
+        else
+          go(id, alphabet)
       }
 
       private def encode(
         numbers: List[Int],
-        partitioned: Boolean = false
-      ): String = {
-        if (numbers.exists(i => i > maxValue || i < minValue))
-          throw SqidsError.OutOfRange(
-            s"some nr is out of range: $numbers, max: $maxValue min: $minValue"
-          )
-
-        if (numbers.isEmpty) ""
-        else {
-          var alphabet = _alphabet.rearrange(numbers)
-
-          val prefix = alphabet.prefix
-
-          val partition = alphabet.partition
-
-          alphabet = alphabet.removePrefixAndPartition
-
-          val ret = ArrayBuffer[String](prefix.toString)
-
-          numbers.zipWithIndex.foreach { case (num, index) =>
-            val alphabetWithoutSeparator = alphabet.removeSeparator
-            ret.append(alphabetWithoutSeparator.toId(num))
-            if (index < numbers.length - 1) {
-              val separator = alphabet.separator
-              if (partitioned && index == 0)
-                ret.append(partition.toString)
-              else ret.append(separator.toString)
-              alphabet = alphabet.shuffle
-            }
-          }
-
-          var id = ret.mkString
-
-          if (options.minLength > id.length) {
-            if (!partitioned)
-              id = encode(0 :: numbers, true)
-
-            if (options.minLength > id.length)
-              id = id.slice(0, 1) + alphabet.value.slice(
-                0,
-                options.minLength - id.length
-              ) + id.slice(1, id.length)
-          }
-
-          if (options.blocklist.isBlocked(id)) {
-            var newNumbers = ArrayBuffer.from(numbers)
-            if (partitioned)
-              if (newNumbers(0) + 1 > this.maxValue)
-                throw new RuntimeException(
-                  "Ran out of range checking against the blocklist"
-                )
-              else
-                newNumbers(0) += 1
-            else
-              newNumbers.prepend(0)
-            id = encode(newNumbers.toList, true)
-          }
-          id
+        partitioned: Boolean
+      ): Either[SqidsError, Sqid] =
+        numbers match {
+          case numbers if numbers.exists(i => i > maxValue || i < minValue) =>
+            Left(
+              SqidsError.OutOfRange(
+                s"some nr is out of range: $numbers, max: $maxValue min: $minValue"
+              )
+            )
+          case numbers =>
+            Right(
+              Sqid
+                .fromNumbers(numbers, _alphabet, partitioned)
+                .handleMinLength(options.minLength)
+                .handleBlocked(options.blocklist)
+            )
         }
-      }
+
     }
   }
-
-  // The default String.split doesn't include last element if empty
-  // which is needed
-  private def splitString(str: String, delimiter: Char): List[String] =
-    str
-      .foldLeft[List[List[Char]]](List(List.empty)) {
-        case (acc, c) if c == delimiter => List() :: acc
-        case (head :: tail, c) => (c :: head) :: tail
-        case (Nil, c) => throw new RuntimeException(s"This is definitely odd, empty list and char: $c")
-      }
-      .map(_.reverse.mkString)
-      .reverse
 }
