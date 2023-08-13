@@ -84,10 +84,10 @@ object Sqids {
           }
 
         val (alphabet, partitionIndex) = {
-          val offset = _alphabet.value.indexOf(prefix)
+          val offset = _alphabet.value.indexOf(prefix.toInt)
           val rearranged = _alphabet.rearrange(offset)
           val partition = rearranged.partition
-          (rearranged.removePrefixAndPartition, id.indexOf(partition))
+          (rearranged.removePrefixAndPartition, id.indexOf(partition.toInt))
         }
 
         if (partitionIndex > 0 && partitionIndex < id.length - 1)

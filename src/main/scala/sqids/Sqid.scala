@@ -72,7 +72,7 @@ object Sqid {
     def go(
       numbers: List[Int],
       sqid: Sqid,
-      first: Boolean = false
+      first: Boolean
     ): Sqid =
       numbers match {
         case Nil => sqid.copy(value = "")
@@ -86,7 +86,8 @@ object Sqid {
                 alphabet.partition.toString,
                 first && partitioned
               )
-              .shuffle
+              .shuffle,
+            first = false
           )
       }
 

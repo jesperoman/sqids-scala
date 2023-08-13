@@ -8,7 +8,7 @@ final case class InvalidAlphabet(override val getMessage: String) extends Runtim
 
 sealed abstract case class Alphabet(value: String) {
   def length = value.length
-  def indexOf(c: Char) = value.indexOf(c)
+  def indexOf(c: Char) = value.indexOf(c.toInt)
   def prefix = value.head
   def partition = value(1)
   def removePrefixAndPartition: Alphabet = new Alphabet(value.drop(2)) {}
