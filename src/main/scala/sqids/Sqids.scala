@@ -51,7 +51,7 @@ object Sqids {
       override def alphabet: Alphabet = options.alphabet
 
       override def encode(numbers: List[Int]): Either[SqidsError, Sqid] =
-        encode(numbers, false)
+        encode_(numbers)
 
       override def minValue: Int = 0
 
@@ -96,9 +96,8 @@ object Sqids {
           go(id, alphabet)
       }
 
-      private def encode(
-        numbers: List[Int],
-        partitioned: Boolean
+      private def encode_(
+        numbers: List[Int]
       ): Either[SqidsError, Sqid] =
         numbers match {
           case numbers if numbers.exists(i => i > maxValue || i < minValue) =>
@@ -110,7 +109,7 @@ object Sqids {
           case numbers =>
             Right(
               Sqid
-                .fromNumbers(numbers, _alphabet, partitioned)
+                .fromNumbers(numbers, _alphabet, false)
                 .handleMinLength(options.minLength)
                 .handleBlocked(options.blocklist)
             )
