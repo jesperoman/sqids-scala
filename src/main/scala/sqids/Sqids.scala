@@ -1,7 +1,5 @@
 package sqids
 
-import sqids.SplitKit._
-
 import scala.annotation.tailrec
 import sqids.options.Alphabet
 import sqids.options.Blocklist
@@ -76,7 +74,7 @@ object Sqids {
           if (id.isEmpty) acc.toList
           else {
             val separator = alphabet.separator
-            id.splitJS(separator) match {
+            id.split(separator.toString, -1).toList match {
               case List(c) => (acc :+ alphabet.removeSeparator.toNumber(c)).toList
               case c :: next =>
                 val newId = next.mkString(separator.toString)

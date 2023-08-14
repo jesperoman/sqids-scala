@@ -34,7 +34,7 @@ sealed abstract case class Alphabet(value: String) {
     val iRange = 0 to value.length - 2
     val jRange = (1 to value.length - 1).reverse
 
-    val result: ArrayBuffer[String] = ArrayBuffer.from(value.split(""))
+    val result: ArrayBuffer[String] = ArrayBuffer.from(value.toList.map(_.toString))
     iRange.zip(jRange).foreach { case (i, j) =>
       val r = (i *
         j +
