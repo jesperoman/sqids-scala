@@ -22,6 +22,8 @@ trait Sqids {
 object Sqids {
   def forAlphabet(a: Alphabet): Either[InvalidSqidsOptions, Sqids] =
     SqidsOptions.default.withAlphabet(a).map(Sqids.apply)
+  def withMinLength(minLength: Int): Either[InvalidSqidsOptions, Sqids] =
+    SqidsOptions.default.withMinLength(minLength).map(Sqids.apply)
 
   def withBlocklist(blocklist: Blocklist): Sqids =
     apply(
