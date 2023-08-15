@@ -60,14 +60,6 @@ object Sqid {
   ): Sqid = {
     val alphabet = a.rearrange(numbers)
 
-    val sqid = Sqid(
-      value = alphabet.prefix.toString,
-      alphabet = alphabet.removePrefixAndPartition,
-      numbers = numbers,
-      partitioned = partitioned,
-      originalAlphabet = a
-    )
-
     @tailrec
     def go(
       numbers: List[Int],
@@ -91,6 +83,16 @@ object Sqid {
           )
       }
 
-    go(numbers = numbers, sqid = sqid, first = true)
+    go(
+      numbers = numbers,
+      sqid = Sqid(
+        value = alphabet.prefix.toString,
+        alphabet = alphabet.removePrefixAndPartition,
+        numbers = numbers,
+        partitioned = partitioned,
+        originalAlphabet = a
+      ),
+      first = true
+    )
   }
 }

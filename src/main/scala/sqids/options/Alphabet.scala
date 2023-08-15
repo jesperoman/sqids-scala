@@ -3,6 +3,8 @@ package sqids.options
 import scala.util.control.NoStackTrace
 import scala.annotation.tailrec
 import scala.collection.mutable.ArrayBuffer
+import java.util.ArrayList
+import java.util.Collections
 
 final case class InvalidAlphabet(override val getMessage: String) extends RuntimeException with NoStackTrace
 
@@ -26,37 +28,20 @@ sealed abstract case class Alphabet(value: String) {
   }
 
   def toNumber(id: String): Int =
-    id.foldLeft(0) { case (acc, c) =>
-      acc * length + indexOf(c)
-    }
+    id.foldLeft(0)((acc, c) => acc * length + indexOf(c))
 
-  def shuffle: Alphabet = {
-    val iRange = 0 to value.length - 2
-    val jRange = (1 to value.length - 1).reverse
-
-    val result: ArrayBuffer[String] = ArrayBuffer.from(value.toList.map(_.toString))
-    iRange.zip(jRange).foreach { case (i, j) =>
-      val r = (i *
-        j +
-        result(i)
-          .codePointAt(0) +
-        result(j)
-          .codePointAt(0)) %
-        value.length
-      val rChar = result(r)
-      val iChar = result(i)
-      result(i) = rChar
-      result(r) = iChar
-    }
-    new Alphabet(result.mkString) {}
-  }
+  def shuffle: Alphabet =
+    new Alphabet(value.indices.take(length - 1).foldLeft(value) { (str, i) =>
+      val j = length - 1 - i
+      val r = (i * j + str(i) + str(j)) % length
+      val iChar = str(i)
+      str.updated(i, str(r)).updated(r, iChar)
+    }) {}
 
   def getOffset(numbers: List[Int]): Int =
-    numbers.zipWithIndex
-      .foldLeft(numbers.length) { case (acc, (number, index)) =>
-        value(number % value.length).toString
-          .codePointAt(0) + index + acc
-      } % value.length
+    numbers.indices.foldLeft(numbers.length) { (offset, i) =>
+      offset + i + value(numbers(i) % length)
+    } % length
 
   def rearrange(offset: Int): Alphabet =
     new Alphabet(value.drop(offset) + value.take(offset)) {}
