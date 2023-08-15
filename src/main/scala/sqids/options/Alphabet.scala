@@ -2,9 +2,6 @@ package sqids.options
 
 import scala.util.control.NoStackTrace
 import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
-import java.util.ArrayList
-import java.util.Collections
 
 final case class InvalidAlphabet(override val getMessage: String) extends RuntimeException with NoStackTrace
 
