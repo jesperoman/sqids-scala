@@ -27,19 +27,26 @@ final case class Sqid(
     )
   def shuffle = copy(alphabet = alphabet.shuffle)
 
-  def blocked(blocklist: Blocklist) = blocklist.isBlocked(value)
-
-  def handleBlocked(blocklist: Blocklist): Sqid =
-    if (blocked(blocklist)) {
-      val newNumbers =
+  def handleBlocked(blocklist: Blocklist, maxValue: Int): Either[SqidsError, Sqid] =
+    if (blocklist.isBlocked(value)) {
+      val newNumbers: Either[SqidsError, List[Int]] =
         if (partitioned)
-          numbers.head + 1 :: numbers.tail
+          // Here we have a true cornercase, we have to find
+          // 2 147 483 647 sequential iterations of a blocked id
+          // before this happens 😅
+          if (numbers.head + 1 > maxValue)
+            Left(SqidsError.OutOfRange("Ran out of range checking against the blocklist"))
+          else
+            Right(numbers.head + 1 :: numbers.tail)
         else
-          0 :: numbers
-      Sqid
-        .fromNumbers(newNumbers, originalAlphabet, true)
-        .handleBlocked(blocklist)
-    } else this
+          Right(0 :: numbers)
+
+      newNumbers.flatMap(numbers =>
+        Sqid
+          .fromNumbers(numbers, originalAlphabet, true)
+          .handleBlocked(blocklist, maxValue)
+      )
+    } else Right(this)
 
   def handleMinLength(minLength: Int): Sqid =
     if (length < minLength)

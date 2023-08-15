@@ -107,12 +107,11 @@ object Sqids {
               )
             )
           case numbers =>
-            Right(
-              Sqid
-                .fromNumbers(numbers, _alphabet, false)
-                .handleMinLength(options.minLength)
-                .handleBlocked(options.blocklist)
-            )
+            Sqid
+              .fromNumbers(numbers, _alphabet, false)
+              .handleMinLength(options.minLength)
+              .handleBlocked(options.blocklist, maxValue)
+
         }
 
     }

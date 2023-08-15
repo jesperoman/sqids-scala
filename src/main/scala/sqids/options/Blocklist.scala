@@ -6,12 +6,9 @@ sealed abstract case class Blocklist(value: Set[String]) {
     value
       .filter(_.length() <= id.length())
       .map(_.toLowerCase())
-      .exists { blockWord =>
-        lowerId.contains(blockWord) ||
-        (blockWord.matches("""\d""") && (lowerId
-          .startsWith(blockWord) || lowerId.endsWith(blockWord)))
-      }
+      .exists(lowerId.contains)
   }
+
   def filter(alphabet: Alphabet): Blocklist =
     Blocklist.apply(value.filter(_.forall(alphabet.value.contains(_))))
 }
